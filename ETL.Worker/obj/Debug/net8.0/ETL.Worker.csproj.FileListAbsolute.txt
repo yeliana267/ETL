@@ -47,3 +47,12 @@ C:\Users\Yeliana\source\repos\ETL\ETL.Worker\obj\Debug\net8.0\refint\ETL.Worker.
 C:\Users\Yeliana\source\repos\ETL\ETL.Worker\obj\Debug\net8.0\ETL.Worker.pdb
 C:\Users\Yeliana\source\repos\ETL\ETL.Worker\obj\Debug\net8.0\ETL.Worker.genruntimeconfig.cache
 C:\Users\Yeliana\source\repos\ETL\ETL.Worker\obj\Debug\net8.0\ref\ETL.Worker.dll
+C:\Users\Yeliana\source\repos\ETL\ETL.Worker\bin\Debug\net8.0\CsvHelper.dll
+C:\Users\Yeliana\source\repos\ETL\ETL.Worker\bin\Debug\net8.0\Data\clients.csv
+C:\Users\Yeliana\source\repos\ETL\ETL.Worker\bin\Debug\net8.0\Data\fuente_datos.csv
+C:\Users\Yeliana\source\repos\ETL\ETL.Worker\bin\Debug\net8.0\Data\products.csv
+C:\Users\Yeliana\source\repos\ETL\ETL.Worker\bin\Debug\net8.0\Data\social_comments.csv
+C:\Users\Yeliana\source\repos\ETL\ETL.Worker\bin\Debug\net8.0\Data\surveys_part1.csv
+C:\Users\Yeliana\source\repos\ETL\ETL.Worker\bin\Debug\net8.0\Data\web_reviews.csv
+C:\Users\Yeliana\source\repos\ETL\ETL.Worker\bin\Debug\net8.0\Npgsql.dll
+C:\Users\Yeliana\source\repos\ETL\ETL.Worker\bin\Debug\net8.0\System.Diagnostics.DiagnosticSource.dll

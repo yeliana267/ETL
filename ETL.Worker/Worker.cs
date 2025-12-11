@@ -1,23 +1,40 @@
+using ETL.Worker.Extractors;
+        
 namespace ETL.Worker;
 
 public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
+    private readonly IEnumerable<IExtractor> _extractors;
 
-    public Worker(ILogger<Worker> logger)
+    public Worker(ILogger<Worker> logger, IEnumerable<IExtractor> extractors)
     {
         _logger = logger;
+        _extractors = extractors;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
+        _logger.LogInformation("ETL Worker iniciado a las: {time}", DateTimeOffset.Now);
+
+        foreach (var extractor in _extractors)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
+            if (stoppingToken.IsCancellationRequested)
+                break;
+
+            _logger.LogInformation("Ejecutando extractor: {name}", extractor.Name);
+
+            try
             {
-                _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+                await extractor.ExtractAsync(stoppingToken);
+                _logger.LogInformation("Finalizado extractor: {name}", extractor.Name);
             }
-            await Task.Delay(1000, stoppingToken);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error en extractor {name}", extractor.Name);
+            }
         }
+
+        _logger.LogInformation("ETL Worker finalizado.");
     }
 }
