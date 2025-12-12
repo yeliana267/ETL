@@ -15,7 +15,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ETL.Worker")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+16621806aa15d4ed13d6ab9c3e52d98bac6a2fb6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f94d8d91749e7fdab4510face3ff21874f6937a0")]
 [assembly: System.Reflection.AssemblyProductAttribute("ETL.Worker")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ETL.Worker")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

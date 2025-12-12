@@ -1,79 +1,73 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using ETL.Worker.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using NpgsqlTypes;
-using ETL.Worker.Models;
 
 namespace ETL.Worker.Loaders
 {
-    public class SurveyLoader : ISurveyLoader
+    public class WebReviewsLoader : IWebReviewsLoader
     {
         private readonly string _connectionString;
-        private readonly ILogger<SurveyLoader> _logger;
+        private readonly ILogger<WebReviewsLoader> _logger;
 
-        public SurveyLoader(IConfiguration config, ILogger<SurveyLoader> logger)
+        public WebReviewsLoader(IConfiguration config, ILogger<WebReviewsLoader> logger)
         {
             _connectionString = config.GetConnectionString("DW")
                 ?? throw new InvalidOperationException("ConnectionStrings:DW no configurado");
             _logger = logger;
         }
 
-        public async Task SaveAsync(IEnumerable<SurveyRecord> records, CancellationToken cancellationToken)
+        public async Task SaveAsync(IEnumerable<WebReviewRecord> records, CancellationToken cancellationToken)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync(cancellationToken);
 
             await using var tx = await conn.BeginTransactionAsync(cancellationToken);
 
-            const string deleteSql = "TRUNCATE TABLE staging.surveys_part1;";
+            // 👀 OJO: aquí estabas truncando surveys_part1, eso es otro staging.
+            const string deleteSql = "TRUNCATE TABLE staging.web_reviews;";
+
             await using (var deleteCmd = new NpgsqlCommand(deleteSql, conn, tx))
             {
                 await deleteCmd.ExecuteNonQueryAsync(cancellationToken);
             }
 
             const string sql = @"
-        INSERT INTO staging.surveys_part1
-        (
-            idopinion,
-            idcliente,
-            idproducto,
-            fecha,
-            comentario,
-            clasificacion,
-            puntajesatisfaccion,
-            fuente
-        )
-        VALUES
-        (
-            @idopinion,
-            @idcliente,
-            @idproducto,
-            @fecha,
-            @comentario,
-            @clasificacion,
-            @puntajesatisfaccion,
-            @fuente
-        );";
+                INSERT INTO staging.web_reviews (
+                    idreview,
+                    idcliente,
+                    idproducto,
+                    fecha,
+                    comentario,
+                    rating
+                )
+                VALUES (
+                    @idreview,
+                    @idcliente,
+                    @idproducto,
+                    @fecha,
+                    @comentario,
+                    @rating
+                );";
 
             await using var cmd = new NpgsqlCommand(sql, conn, tx);
 
-            cmd.Parameters.Add("@idopinion", NpgsqlDbType.Integer);
-            cmd.Parameters.Add("@idcliente", NpgsqlDbType.Integer);
-            cmd.Parameters.Add("@idproducto", NpgsqlDbType.Integer);
+            cmd.Parameters.Add("@idreview", NpgsqlDbType.Varchar);
+            cmd.Parameters.Add("@idcliente", NpgsqlDbType.Varchar);
+            cmd.Parameters.Add("@idproducto", NpgsqlDbType.Varchar);
             cmd.Parameters.Add("@fecha", NpgsqlDbType.Date);
             cmd.Parameters.Add("@comentario", NpgsqlDbType.Text);
-            cmd.Parameters.Add("@clasificacion", NpgsqlDbType.Varchar);
-            cmd.Parameters.Add("@puntajesatisfaccion", NpgsqlDbType.Integer);
-            cmd.Parameters.Add("@fuente", NpgsqlDbType.Varchar);
+            cmd.Parameters.Add("@rating", NpgsqlDbType.Integer);
 
             var count = 0;
 
             foreach (var r in records)
             {
-                cmd.Parameters["@idopinion"].Value = r.IdOpinion;
+                cmd.Parameters["@idreview"].Value = r.IdReview;
                 cmd.Parameters["@idcliente"].Value = r.IdCliente;
                 cmd.Parameters["@idproducto"].Value = r.IdProducto;
                 cmd.Parameters["@fecha"].Value = r.Fecha.Date;
@@ -81,25 +75,18 @@ namespace ETL.Worker.Loaders
                     string.IsNullOrWhiteSpace(r.Comentario)
                         ? DBNull.Value
                         : r.Comentario;
-
-                cmd.Parameters["@clasificacion"].Value =
-                    string.IsNullOrWhiteSpace(r.Clasificacion)
-                        ? DBNull.Value
-                        : r.Clasificacion;
-
-                cmd.Parameters["@puntajesatisfaccion"].Value = r.PuntajeSatisfaccion;
-                cmd.Parameters["@fuente"].Value = r.Fuente;
+                cmd.Parameters["@rating"].Value = r.Rating;
 
                 await cmd.ExecuteNonQueryAsync(cancellationToken);
                 count++;
             }
 
             await tx.CommitAsync(cancellationToken);
+
             _logger.LogInformation(
-                "Se guardaron {Count} encuestas en staging.surveys_part1",
+                "Se guardaron {Count} registros en staging.web_reviews",
                 count
             );
         }
-
     }
 }

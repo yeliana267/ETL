@@ -2,8 +2,7 @@
 
 namespace ETL.Worker.Loaders
 {
-    public interface ISurveyLoader : ILoader<SurveyRecord>
+    public interface IFuenteDatosLoader : ILoader<FuenteDatosRecord>
     {
     }
 }
-    
